@@ -3,23 +3,11 @@
   "profiles": {
     "SalesReporting (Development)": {
       "commandName": "Project",
+      "commandLineArgs": "--Year 2024 --Month 3",
+      "workingDirectory": "$(ProjectDir)",
       "dotnetRunMessages": true,
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
-      }
-    },
-    "SalesReporting (Staging)": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Staging"
-      }
-    },
-    "SalesReporting (Production)": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Production"
       }
     }
   }
