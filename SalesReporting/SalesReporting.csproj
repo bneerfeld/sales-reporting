@@ -1,13 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
-
     <ItemGroup>
+        <PackageReference Include="Ardalis.SmartEnum" />
+        <PackageReference Include="Ardalis.SmartEnum.SystemTextJson" />
         <PackageReference Include="Microsoft.Extensions.Hosting" />
+        <PackageReference Include="Serilog" />
+        <PackageReference Include="Serilog.Extensions.Hosting" />
+        <PackageReference Include="Serilog.Settings.Configuration" />
+        <PackageReference Include="Serilog.Sinks.Console" />
     </ItemGroup>
-
     <ItemGroup>
         <None Update="appsettings*.json" CopyToOutputDirectory="PreserveNewest" />
         <None Update="appsettings.Development.json">
@@ -19,5 +22,6 @@
         <None Update="appsettings.Staging.json">
           <DependentUpon>appsettings.json</DependentUpon>
         </None>
+        <None Update="Data/sales.json" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 </Project>
