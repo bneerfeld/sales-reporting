@@ -16,27 +16,51 @@ Die Währungen werden über eine Kette von `if`-Abfragen mit festen Strings und 
 
 ## Mein Ansatz
 
-Ich wollte zeigen, dass ich mit modernen Mitteln arbeiten kann, ohne es zu übertreiben. Ehrlich gesagt habe ich mich am Anfang etwas schwergetan, die Linie zu ziehen, was hier wirklich gefordert ist. Für mich habe ich dann entschieden: Ich zeige, dass das Wissen da ist, auch in der Breite, und vor allem, dass ich weiß, wie Abstraktion funktioniert und wie man eine Struktur baut, die sich testen lässt.
+Ich wollte zeigen, dass ich mit modernen Mitteln arbeiten kann, ohne zu übertreiben. Ehrlich gesagt fiel es mir schwer, die Grenze zu ziehen: Was ist wirklich die richtige Lösung, und was wird erwartet? Meine Strategie war deshalb folgende: Ich zeige, was ich kann. Besonders wichtig war mir, zu zeigen, wie man strukturiert und mit Abstraktion entwickelt. Am wichtigsten fand ich aber, dass sich Software testen lässt.
 
-Auf die Spitze getrieben habe ich das bewusst nicht. In der Stellenanzeige standen KISS, DRY und YAGNI als Prinzipien, die man kennen sollte. Das habe ich als kleinen Hinweis und auch als Ansporn genommen, hier zu zeigen, dass ich sie auch anwende. Ausgerechnet in der Aufgabe dagegen zu verstoßen, wäre ja ziemlich ironisch gewesen. Meine Idee war, den Code so zu nehmen, wie er ist, und ihn schlüssiger, moderner und sauberer zu schreiben. Wer reinschaut, soll sehen, dass ich weiß, wie man so etwas skaliert, ohne dass es overengineert wirkt.
+Während der Bearbeitung kam mir aber immer wieder ein Punkt aus der Stellenanzeige in den Kopf, nämlich die Prinzipien KISS, DRY und YAGNI. Man kann davon halten, was man möchte, aber ich denke, diese drei Prinzipien sind ein Grundstein der Softwareentwicklung. Wie man sie versteht und anwendet, ist allerdings eine Diskussion für sich. Ich habe versucht, den Rahmen nicht zu sprengen. Ich wollte es aber nicht einfach simpel halten oder nur das Nötigste tun, sondern auch zeigen, wer ich bin: Softwareentwickler durch und durch. An manchen Stellen habe ich Abstriche gemacht, die ich später noch genauer beschreibe und hervorhebe.
 
-Ich habe mich für einen kleinen Dienst über den .NET Generic Host entschieden, weil das für mich mittlerweile einfach der Standard ist. So habe ich Dependency Injection und Logging direkt dabei, und Jahr und Monat kommen einfach als Parameter über die Kommandozeile rein. Für mich ist das die sauberste Lösung.
+Für das Refactoring habe ich mich für einen kleinen Dienst auf Basis des .NET Generic Host entschieden, weil das für mich inzwischen der Standard ist. Dependency Injection und Logging sind so direkt dabei, und Jahr und Monat werden als Parameter über die Kommandozeile übergeben. Ich halte das für die sauberste Lösung.
 
-Bei den Smart Enums war es ähnlich. Als ich die `if`-Ketten gesehen habe, gab es für mich zwei Wege: ein `switch` oder ein Enum. Normale Enums können aber keine Logik tragen, also habe ich zu Smart Enums gegriffen. Mit denen arbeite ich privat und habe sie auch schon im Job eingesetzt. Jede Währung kennt jetzt ihren eigenen Kurs, und die `if`-Ketten sind komplett weg. In diesem Fall halte ich das für die beste und sauberste Lösung.
+Bei den Smart Enums war es ähnlich. Als ich die if-Ketten sah, gab es für mich zwei Wege: ein switch oder ein Enum. Da normale Enums keine Logik tragen können, habe ich Smart Enums gewählt. Mit ihnen arbeite ich privat und habe sie auch schon im Job eingesetzt. Jede Währung kennt jetzt ihren eigenen Kurs, und die if-Ketten sind vollständig entfernt.
 
-Damit man auch sieht, dass der Code wirklich testbar ist, habe ich ein kleines Testprojekt dazu gebaut. Ich will dabei offen sein: Ich weiß, was Tests sind und wie man sie einsetzt, praktisch habe ich damit aber noch relativ wenig Erfahrung. Wo es um Zahlen, Berechnungen und klare Logik geht, sind Tests trotzdem immer ein Gewinn, und das ist hier definitiv der Fall.
+Um meinem eigenen Anspruch von Anfang an gerecht zu werden, habe ich gleich zu Beginn ein Testprojekt angelegt und verwende dafür XUnit. Die Testfälle, die ich im Kopf hatte, waren folgende: FOLGENDEN ...
+
+Ich weiß, was Tests sind und wie man sie einsetzt, habe praktisch aber noch relativ wenig Erfahrung damit. Bei Zahlen, Berechnungen und klarer Logik sind Tests trotzdem immer ein Gewinn, und das trifft hier eindeutig zu.
+
+## Abweichungen und Abstriche
+
+### Bewusste Abweichungen vom Original
+
+Streng genommen ändert ein Refactoring das Verhalten nicht. An zwei Stellen bin ich davon bewusst abgewichen:
+
+- Der Bericht wird nicht mehr als Textdatei `report_{year}_{month}.txt` gespeichert, sondern als JSON-Datei pro Report. Eine Textdatei mit Überschrift und Trennlinie ist nur für Menschen lesbar. Praktisch gesehen wird das aber kaum der Anwendungsfall sein. Sicher wird es irgendwann eine UI geben, die so etwas anzeigt. Nüchtern betrachtet war für mich klar, das JSON-Format zu verwenden: Es lässt sich direkt weiterverarbeiten und bleibt trotzdem für Menschen lesbar.
+
+- Da es keine konkreten Rahmenbedingungen gab, habe ich statt einer festen `sales.json` als Eingabequelle die Möglichkeit implementiert, mehrere Reports aus `Data/` zu verarbeiten. In der Realität ist das sicher sinnvoll. Zum Ablauf ist Folgendes zu sagen: Ein fehlerhafter Report unterbricht nicht den gesamten Lauf, sondern wird übersprungen und wird im sowohl über den Logger als auch im Exit-Code gemeldet.
+
+### Was ich in der Realität bei diesem Projekt anders machen würde
+- **Ablauf:** Der `ReportJob` läuft einmal und wird direkt aus `Program.cs` gestartet. Wenn die Berichte regelmäßig erstellt werden sollen, etwa an jedem Monatsersten, würde ich daraus einen `BackgroundService` mit Timer machen.
+- **Ordnerstruktur:** Derzeit ist der Code nach technischen Schichten sortiert (`Domain`, `Persistence`, `Reporting`). Bei dieser Größe genügt das. Mit jedem weiteren Interface und Writer würde ich aber nach Features schneiden, damit alles, was zu einer Funktion gehört, an einem Ort liegt.
+- **Validierung:** Die Eingaben werden schon bei der Registrierung mit `.Validate(...)` geprüft. Für ein paar zusätzliche Regeln reichen eigene `IValidateOptions`-Klassen. Sobald die Regeln komplexer werden, weil sie zum Beispiel voneinander abhängen oder an mehreren Stellen gebraucht werden, würde ich eine Bibliothek wie FluentValidation einsetzen. Sie lässt sich über einen `IValidateOptions`-Adapter ebenfalls an die Options anbinden.
+
+**Mögliche Erweiterungen**
+- **Dateitypen:** Ursprünglich wollte ich auch andere Dateitypen unterstützen, vor allem CSV. Diesen Gedanken habe ich aber bewusst verworfen, weil er nicht zum Refactoring gepasst hätte.
+- **Parameterübergabe:** Ich hatte außerdem überlegt, die von mir eingeführte Parameterübergabe des Dienstes zu erweitern. Einzelne Parameter könnten dann wegfallen, sodass man zum Beispiel für ein ganzes Jahr die Reports aller Monate bekommt oder einfach alle Reports. Auch das hätte aber nicht wirklich zum Refactoring gepasst.
 
 ## Projekt starten
 
-Voraussetzung ist das .NET 10 SDK. Jahr und Monat werden beim Start als Parameter übergeben:
+Voraussetzung ist das .NET 10 SDK. Jahr und Monat werden beim Start als Parameter übergeben. Ohne `--Report` laufen alle Reports aus `Data/`, mit `--Report <Name>` (ohne `.json`) nur dieser eine:
 
 ```bash
-dotnet run --project SalesReporting -- --Year 2024 --Month 3
+dotnet run --project SalesReporting -- --Year 2026 --Month 10
+dotnet run --project SalesReporting -- --Year 2026 --Month 10 --Report berlin
 ```
 
-In Rider geht es auch ohne Kommandozeile. Das Startprofil `SalesReporting (Development)` übergibt die Parameter schon, man muss also nur auf Run oder Debug drücken.
+Jeder Bericht landet als JSON-Datei im Ordner `Reports/` neben der Anwendung, z. B. `Reports/berlin_2026_10.json`. Der Ordner lässt sich über `Folders:Reports` in der `appsettings.json` ändern.
 
-Die Tests laufen über:
+Mit Rider oder auch Visual Studio (nicht getestet) geht es auch ohne Kommandozeile. Die Startprofile `All`, `Valid` und `Invalid` übergeben die Parameter schon, man muss also nur auf Run oder Debug drücken.
+
+Sobald Tests dazukommen, laufen sie über:
 
 ```bash
 dotnet test
@@ -50,22 +74,29 @@ SalesReporting/
 ├── Directory.Build.props          gemeinsame Projekteinstellungen
 ├── Directory.Packages.props       zentrale Paketversionen
 ├── SalesReporting/
-│   ├── Program.cs                 Einstiegspunkt, startet den Host
+│   ├── Program.cs                 Einstiegspunkt, baut den Host und startet den ReportJob
 │   ├── DependencyInjection.cs     Registrierung der Dienste
+│   ├── ExitCode.cs                Exit-Codes der Anwendung
 │   ├── Refactoring.cs             Ausgangscode der Vorgabe (auskommentiert)
 │   ├── Domain/
 │   │   ├── Currency.cs            Smart Enum mit Umrechnungskurs
 │   │   ├── Sale.cs
 │   │   └── MonthlySalesReport.cs
 │   ├── Persistence/
+│   │   ├── FolderOptions.cs       Ordner für Verkaufsdaten und Berichte
+│   │   ├── IReportWriter.cs
 │   │   ├── ISaleRepository.cs
+│   │   ├── JsonReportWriter.cs    schreibt den Bericht als JSON-Datei
 │   │   ├── JsonSaleRepository.cs
-│   │   └── SalesFileOptions.cs
+│   │   ├── SaleJsonParser.cs      liest Verkäufe aus einem Stream
+│   │   └── SalesFileLocator.cs    findet die Datendatei zum Report-Namen
 │   ├── Reporting/
-│   │   ├── ReportService.cs       filtert und summiert die Verkäufe
-│   │   └── ReportPrinter.cs       gibt den Bericht über das Logging aus
+│   │   ├── ReportJob.cs           steuert den Ablauf über alle Reports
+│   │   ├── ReportRequestOptions.cs Jahr, Monat und Report aus der Kommandozeile
+│   │   └── ReportService.cs       filtert und summiert die Verkäufe
 │   ├── Data/
-│   │   └── sales.json             Beispieldaten
+│   │   ├── berlin.json, …         fünf Filialen mit Verkäufen von Juni bis Oktober 2026,
+│   │   │                          hamburg und koeln enthalten fehlerhafte Einträge
 │   └── appsettings*.json          Konfiguration je Umgebung
 └── SalesReporting.Tests/
 ```
