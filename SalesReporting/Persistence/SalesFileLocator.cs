@@ -24,7 +24,7 @@ public sealed class SalesFileLocator(string salesFolder)
         [
             .. Directory.EnumerateFiles(_salesFolder, "*" + FileExtension)
                 .Select(filePath => Path.GetFileNameWithoutExtension(filePath))
-                .Order()
+                .Order(StringComparer.Ordinal)
         ];
     }
 }

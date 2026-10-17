@@ -11,7 +11,7 @@ public sealed class ReportJobTests
     private const int Year = 2026;
     private const int Month = 10;
 
-    private static readonly IReadOnlyList<Sale> OctoberSales = [new Sale(new DateOnly(2026, 10, 1), 100m, Currency.Usd)];
+    private static readonly IReadOnlyList<Sale> OctoberSales = [new(new DateOnly(2026, 10, 1), 100m, Currency.Usd)];
 
     private readonly InMemoryReportWriter _writer = new();
 
@@ -43,7 +43,7 @@ public sealed class ReportJobTests
     public async Task RunAsync_WithReport_WritesOnlyThatReport()
     {
         InMemorySaleRepository repository = new(SalesFor("frankfurt", "berlin"));
-        MonthlySalesReport[] expected = [new MonthlySalesReport("berlin", Year, Month, 100m)];
+        MonthlySalesReport[] expected = [new("berlin", Year, Month, 100m)];
 
         ExitCode exitCode = await RunAsync(repository, report: "berlin");
 

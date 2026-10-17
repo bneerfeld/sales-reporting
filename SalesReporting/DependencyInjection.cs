@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -52,8 +53,8 @@ public static class DependencyInjection
         services.AddOptions<ReportRequestOptions>()
             .Configure(options =>
             {
-                options.Year = int.TryParse(configuration[nameof(ReportRequestOptions.Year)], out int year) ? year : 0;
-                options.Month = int.TryParse(configuration[nameof(ReportRequestOptions.Month)], out int month) ? month : 0;
+                options.Year = int.TryParse(configuration[nameof(ReportRequestOptions.Year)], CultureInfo.InvariantCulture, out int year) ? year : 0;
+                options.Month = int.TryParse(configuration[nameof(ReportRequestOptions.Month)], CultureInfo.InvariantCulture, out int month) ? month : 0;
                 options.Report = configuration[nameof(ReportRequestOptions.Report)];
             })
             .Validate(options => options.Year >= DateTime.MinValue.Year && options.Year <= DateTime.MaxValue.Year, "'--Year' must be a valid year.")

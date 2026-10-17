@@ -10,20 +10,20 @@ public sealed class ReportServiceTests
     private const int Year = 2026;
     private const int Month = 10;
 
-    public static TheoryData<DateOnly> DatesInsideMonth => new()
-    {
-        new DateOnly(2026, 10, 1),
-        new DateOnly(2026, 10, 15),
-        new DateOnly(2026, 10, 31)
-    };
+    public static TheoryData<DateOnly> DatesInsideMonth =>
+    [
+        new(2026, 10, 1),
+        new(2026, 10, 15),
+        new(2026, 10, 31)
+    ];
 
-    public static TheoryData<DateOnly> DatesOutsideMonth => new()
-    {
-        new DateOnly(2026, 9, 30),
-        new DateOnly(2026, 11, 1),
-        new DateOnly(2025, 10, 15),
-        new DateOnly(2027, 10, 15)
-    };
+    public static TheoryData<DateOnly> DatesOutsideMonth =>
+    [
+        new(2026, 9, 30),
+        new(2026, 11, 1),
+        new(2025, 10, 15),
+        new(2027, 10, 15)
+    ];
 
     [Theory]
     [MemberData(nameof(DatesInsideMonth))]
