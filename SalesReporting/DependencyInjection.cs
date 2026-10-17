@@ -50,9 +50,15 @@ public static class DependencyInjection
     public static IServiceCollection AddReporting(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<ReportRequestOptions>()
-            .Bind(configuration)
+            .Configure(options =>
+            {
+                options.Year = int.TryParse(configuration[nameof(ReportRequestOptions.Year)], out int year) ? year : 0;
+                options.Month = int.TryParse(configuration[nameof(ReportRequestOptions.Month)], out int month) ? month : 0;
+                options.Report = configuration[nameof(ReportRequestOptions.Report)];
+            })
             .Validate(options => options.Year >= DateTime.MinValue.Year && options.Year <= DateTime.MaxValue.Year, "'--Year' must be a valid year.")
-            .Validate(options => options.Month is >= ReportRequestOptions.FirstMonth and <= ReportRequestOptions.LastMonth, $"'--Month' must be between {ReportRequestOptions.FirstMonth} and {ReportRequestOptions.LastMonth}.");
+            .Validate(options => options.Month is >= ReportRequestOptions.FirstMonth and <= ReportRequestOptions.LastMonth, $"'--Month' must be between {ReportRequestOptions.FirstMonth} and {ReportRequestOptions.LastMonth}.")
+            .Validate(options => options.Report is null || Path.GetFileName(options.Report) == options.Report, "'--Report' must be a report name without a path.");
 
         services.AddSingleton<ReportService>();
         services.AddSingleton<ReportJob>();
