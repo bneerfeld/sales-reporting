@@ -15,6 +15,9 @@
         </PackageReference>
     </ItemGroup>
     <ItemGroup>
+        <ProjectReference Include="..\SalesReporting\SalesReporting.csproj" />
+    </ItemGroup>
+    <ItemGroup>
         <Using Include="Xunit" />
     </ItemGroup>
 </Project>
