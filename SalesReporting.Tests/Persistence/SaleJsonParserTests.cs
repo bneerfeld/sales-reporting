@@ -18,8 +18,8 @@ public sealed class SaleJsonParserTests
             """;
         Sale[] expected =
         [
-            new Sale(new DateTime(2026, 10, 1), 12.34m, Currency.Eur),
-            new Sale(new DateTime(2026, 10, 31), 100m, Currency.Gbp)
+            new Sale(new DateOnly(2026, 10, 1), 12.34m, Currency.Eur),
+            new Sale(new DateOnly(2026, 10, 31), 100m, Currency.Gbp)
         ];
 
         IReadOnlyList<Sale> sales = await ParseAsync(json);

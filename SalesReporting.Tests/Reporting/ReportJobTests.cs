@@ -11,7 +11,7 @@ public sealed class ReportJobTests
     private const int Year = 2026;
     private const int Month = 10;
 
-    private static readonly IReadOnlyList<Sale> OctoberSales = [new Sale(new DateTime(2026, 10, 1), 100m, Currency.Usd)];
+    private static readonly IReadOnlyList<Sale> OctoberSales = [new Sale(new DateOnly(2026, 10, 1), 100m, Currency.Usd)];
 
     private readonly InMemoryReportWriter _writer = new();
 
