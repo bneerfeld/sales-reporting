@@ -21,25 +21,41 @@ public static class DependencyInjection
 
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptions<SalesFileOptions>()
-            .Bind(configuration.GetSection(SalesFileOptions.SectionName))
-            .Validate(options => !string.IsNullOrWhiteSpace(options.FilePath), $"'{SalesFileOptions.SectionName}:FilePath' must be configured.");
+        services.AddOptions<FolderOptions>()
+            .Bind(configuration.GetSection(FolderOptions.SectionName))
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Sales), $"'{FolderOptions.SectionName}:Sales' must be configured.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Reports), $"'{FolderOptions.SectionName}:Reports' must be configured.");
 
-        services.AddSingleton<ISaleRepository>(serviceProvider =>
+        services.AddSingleton(serviceProvider =>
         {
-            SalesFileOptions options = serviceProvider.GetRequiredService<IOptions<SalesFileOptions>>().Value;
+            FolderOptions options = serviceProvider.GetRequiredService<IOptions<FolderOptions>>().Value;
             IHostEnvironment environment = serviceProvider.GetRequiredService<IHostEnvironment>();
 
-            return new JsonSaleRepository(Path.Combine(environment.ContentRootPath, options.FilePath));
+            return new SalesFileLocator(Path.Combine(environment.ContentRootPath, options.Sales));
         });
+
+        services.AddSingleton<IReportWriter>(serviceProvider =>
+        {
+            FolderOptions options = serviceProvider.GetRequiredService<IOptions<FolderOptions>>().Value;
+            IHostEnvironment environment = serviceProvider.GetRequiredService<IHostEnvironment>();
+
+            return new JsonReportWriter(Path.Combine(environment.ContentRootPath, options.Reports));
+        });
+
+        services.AddSingleton<ISaleRepository, JsonSaleRepository>();
 
         return services;
     }
 
-    public static IServiceCollection AddReporting(this IServiceCollection services)
+    public static IServiceCollection AddReporting(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddOptions<ReportRequestOptions>()
+            .Bind(configuration)
+            .Validate(options => options.Year >= DateTime.MinValue.Year && options.Year <= DateTime.MaxValue.Year, "'--Year' must be a valid year.")
+            .Validate(options => options.Month is >= ReportRequestOptions.FirstMonth and <= ReportRequestOptions.LastMonth, $"'--Month' must be between {ReportRequestOptions.FirstMonth} and {ReportRequestOptions.LastMonth}.");
+
         services.AddSingleton<ReportService>();
-        services.AddSingleton<ReportPrinter>();
+        services.AddSingleton<ReportJob>();
 
         return services;
     }

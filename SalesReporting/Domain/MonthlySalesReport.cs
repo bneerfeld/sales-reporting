@@ -1,3 +1,3 @@
 namespace SalesReporting.Domain;
 
-public sealed record MonthlySalesReport(int Year, int Month, decimal TotalUsd);
+public sealed record MonthlySalesReport(string ReportName, int Year, int Month, decimal TotalUsd);

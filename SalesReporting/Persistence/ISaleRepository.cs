@@ -4,5 +4,7 @@ namespace SalesReporting.Persistence;
 
 public interface ISaleRepository
 {
-    Task<IReadOnlyList<Sale>> GetAllAsync(CancellationToken cancellationToken);
+    IReadOnlyList<string> GetReportNames();
+
+    Task<IReadOnlyList<Sale>?> GetAllAsync(string reportName, CancellationToken cancellationToken);
 }

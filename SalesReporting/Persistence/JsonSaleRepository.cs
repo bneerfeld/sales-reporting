@@ -1,22 +1,20 @@
-using System.Text.Json;
-using Ardalis.SmartEnum.SystemTextJson;
 using SalesReporting.Domain;
 
 namespace SalesReporting.Persistence;
 
-public sealed class JsonSaleRepository(string filePath) : ISaleRepository
+public sealed class JsonSaleRepository(SalesFileLocator salesFileLocator) : ISaleRepository
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
-    {
-        Converters = { new SmartEnumNameConverter<Currency, int>() }
-    };
+    public IReadOnlyList<string> GetReportNames() => salesFileLocator.ListReportNames();
 
-    public async Task<IReadOnlyList<Sale>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Sale>?> GetAllAsync(string reportName, CancellationToken cancellationToken)
     {
+        string? filePath = salesFileLocator.Locate(reportName);
+
+        if (filePath is null)
+            return null;
+
         await using FileStream stream = File.OpenRead(filePath);
 
-        List<Sale>? sales = await JsonSerializer.DeserializeAsync<List<Sale>>(stream, SerializerOptions, cancellationToken);
-
-        return sales ?? [];
+        return await SaleJsonParser.ParseAsync(stream, cancellationToken);
     }
 }
