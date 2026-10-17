@@ -1,0 +1,46 @@
+name: SonarQube Cloud
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Build, test and analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install SonarScanner for .NET
+        run: dotnet tool install dotnet-sonarscanner --version 12.0.0 --tool-path "$RUNNER_TEMP/sonar-scanner"
+
+      - name: Build, test and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          "$RUNNER_TEMP/sonar-scanner/dotnet-sonarscanner" begin \
+            /k:"bneerfeld_sales-reporting" \
+            /o:"bneerfeld" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.token="$SONAR_TOKEN" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage.opencover.xml"
+          dotnet build --no-incremental
+          dotnet test --no-build --collect:"XPlat Code Coverage;Format=opencover"
+          "$RUNNER_TEMP/sonar-scanner/dotnet-sonarscanner" end /d:sonar.token="$SONAR_TOKEN"
