@@ -1,9 +1,27 @@
 {
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "SalesReporting (Development)": {
+    "All": {
       "commandName": "Project",
-      "commandLineArgs": "--Year 2024 --Month 3",
+      "commandLineArgs": "--Year 2026 --Month 10",
+      "workingDirectory": "$(ProjectDir)",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Valid": {
+      "commandName": "Project",
+      "commandLineArgs": "--Year 2026 --Month 10 --Report berlin",
+      "workingDirectory": "$(ProjectDir)",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Invalid": {
+      "commandName": "Project",
+      "commandLineArgs": "--Year 2026 --Month 10 --Report koeln",
       "workingDirectory": "$(ProjectDir)",
       "dotnetRunMessages": true,
       "environmentVariables": {
