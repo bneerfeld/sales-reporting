@@ -24,7 +24,14 @@ Für das Refactoring habe ich mich für einen kleinen Dienst auf Basis des .NET 
 
 Bei den Smart Enums war es ähnlich. Als ich die if-Ketten sah, gab es für mich zwei Wege: ein switch oder ein Enum. Da normale Enums keine Logik tragen können, habe ich Smart Enums gewählt. Mit ihnen arbeite ich privat und habe sie auch schon im Job eingesetzt. Jede Währung kennt jetzt ihren eigenen Kurs, und die if-Ketten sind vollständig entfernt.
 
-Um meinem eigenen Anspruch von Anfang an gerecht zu werden, habe ich gleich zu Beginn ein Testprojekt angelegt und verwende dafür XUnit. Die Testfälle, die ich im Kopf hatte, waren folgende: FOLGENDEN ...
+Um meinem eigenen Anspruch von Anfang an gerecht zu werden, habe ich gleich zu Beginn ein Testprojekt angelegt und verwende dafür XUnit. 
+
+Die Testfälle, die ich im Kopf hatte, waren folgende:
+
+- **Umrechnungen:** Jede Währung wird mit ihrem Kurs umgerechnet, und dank `decimal` stimmt das Ergebnis exakt: 3 × 0,1 EUR ergeben genau 0,33 USD.
+- **Filterung:** Es zählen nur Verkäufe aus dem angefragten Monat und Jahr, auch am ersten und letzten Tag des Monats. Derselbe Monat in einem anderen Jahr zählt nicht.
+- **Parameter-Validierung:** Was passiert, wenn Jahr oder Monat fehlen oder ungültig sind, etwa Monat 13 oder `--Year abc`.
+- **Fehlerhafte Dateien:** Eine fehlende oder unbekannte Währung, kaputtes JSON oder leere Einträge müssen auffallen und dürfen nicht still in die Summe eingehen.
 
 Ich weiß, was Tests sind und wie man sie einsetzt, habe praktisch aber noch relativ wenig Erfahrung damit. Bei Zahlen, Berechnungen und klarer Logik sind Tests trotzdem immer ein Gewinn, und das trifft hier eindeutig zu.
 
@@ -46,6 +53,15 @@ Streng genommen ändert ein Refactoring das Verhalten nicht. An zwei Stellen bin
 **Mögliche Erweiterungen**
 - **Dateitypen:** Ursprünglich wollte ich auch andere Dateitypen unterstützen, vor allem CSV. Diesen Gedanken habe ich aber bewusst verworfen, weil er nicht zum Refactoring gepasst hätte.
 - **Parameterübergabe:** Ich hatte außerdem überlegt, die von mir eingeführte Parameterübergabe des Dienstes zu erweitern. Einzelne Parameter könnten dann wegfallen, sodass man zum Beispiel für ein ganzes Jahr die Reports aller Monate bekommt oder einfach alle Reports. Auch das hätte aber nicht wirklich zum Refactoring gepasst.
+
+## Fazit
+
+Trotz Schwierigkeiten am Anfang habe ich ein solides Ergebnis abgegeben, mit dem ich zufrieden bin. Vor allem habe ich hier mitgenommen, dass ich beim Schreiben der Tests sogar noch ein paar Bugs entdeckt habe, die ich dadurch auch beheben konnte.
+
+Außerdem habe ich mich relativ früh dafür entschieden, GitHub zu nutzen – zum einen, weil es in der Aufgabenstellung stand, zum anderen, weil mir GitHub im ersten Gespräch ans Herz gelegt wurde.
+
+Zudem habe ich SonarQube und die eigene Code-Analyse von GitHub angebunden, da beide kostenlos nutzbar sind und für eine höhere Codequalität sorgen. Auch wenn das bei diesem Refactoring wohl kaum einen Unterschied macht, war es dennoch sehr interessant, etwas Neues auszuprobieren.
+
 
 ## Projekt starten
 
@@ -73,6 +89,8 @@ SalesReporting/
 ├── SalesReporting.slnx
 ├── Directory.Build.props          gemeinsame Projekteinstellungen
 ├── Directory.Packages.props       zentrale Paketversionen
+├── .github/workflows/
+│   └── sonarqube.yml              SonarQube-Cloud-Analyse mit Testabdeckung
 ├── SalesReporting/
 │   ├── Program.cs                 Einstiegspunkt, baut den Host und startet den ReportJob
 │   ├── DependencyInjection.cs     Registrierung der Dienste
@@ -94,9 +112,28 @@ SalesReporting/
 │   │   ├── ReportJob.cs           steuert den Ablauf über alle Reports
 │   │   ├── ReportRequestOptions.cs Jahr, Monat und Report aus der Kommandozeile
 │   │   └── ReportService.cs       filtert und summiert die Verkäufe
-│   ├── Data/
-│   │   ├── berlin.json, …         fünf Filialen mit Verkäufen von Juni bis Oktober 2026,
-│   │   │                          hamburg und koeln enthalten fehlerhafte Einträge
+│   ├── Data/                      fünf Filialen mit Verkäufen von Juni bis Oktober 2026
+│   │   ├── berlin.json
+│   │   ├── frankfurt.json
+│   │   ├── hamburg.json           fehlerhaft: ein Eintrag ohne Währung
+│   │   ├── koeln.json             fehlerhaft: unbekannte Währung CHF
+│   │   └── muenchen.json
+│   ├── Properties/
+│   │   └── launchSettings.json    Startprofile All, Valid und Invalid
 │   └── appsettings*.json          Konfiguration je Umgebung
 └── SalesReporting.Tests/
+    ├── Domain/
+    │   └── CurrencyTests.cs       Umrechnung und decimal-Genauigkeit
+    ├── Fakes/                     Test-Doubles für Repository und Writer
+    │   ├── InMemoryReportWriter.cs
+    │   └── InMemorySaleRepository.cs
+    ├── Persistence/
+    │   ├── FolderOptionsValidationTests.cs
+    │   ├── JsonReportWriterTests.cs
+    │   ├── SaleJsonParserTests.cs fehlerhafte Dateien
+    │   └── SalesFileLocatorTests.cs
+    └── Reporting/
+        ├── ReportJobTests.cs      Ablauf über mehrere Reports und Exit-Codes
+        ├── ReportRequestValidationTests.cs vergessene und ungültige Parameter
+        └── ReportServiceTests.cs  Filterung und Summe
 ```
