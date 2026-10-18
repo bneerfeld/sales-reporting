@@ -24,7 +24,7 @@ Für das Refactoring habe ich mich für einen kleinen Dienst auf Basis des .NET 
 
 Bei den Smart Enums war es ähnlich. Als ich die if-Ketten sah, gab es für mich zwei Wege: ein switch oder ein Enum. Da normale Enums keine Logik tragen können, habe ich Smart Enums gewählt. Mit ihnen arbeite ich privat und habe sie auch schon im Job eingesetzt. Jede Währung kennt jetzt ihren eigenen Kurs, und die if-Ketten sind vollständig entfernt.
 
-Um meinem eigenen Anspruch von Anfang an gerecht zu werden, habe ich gleich zu Beginn ein Testprojekt angelegt und verwende dafür XUnit. 
+Um meinem eigenen Anspruch von Anfang an gerecht zu werden, habe ich gleich zu Beginn ein Testprojekt angelegt (auch wenn nicht sofort umgesetzt) und habe mich hierfür XUnit entschieden. 
 
 Die Testfälle, die ich im Kopf hatte, waren folgende:
 
@@ -43,7 +43,7 @@ Streng genommen ändert ein Refactoring das Verhalten nicht. An zwei Stellen bin
 
 - Der Bericht wird nicht mehr als Textdatei `report_{year}_{month}.txt` gespeichert, sondern als JSON-Datei pro Report. Eine Textdatei mit Überschrift und Trennlinie ist nur für Menschen lesbar. Praktisch gesehen wird das aber kaum der Anwendungsfall sein. Sicher wird es irgendwann eine UI geben, die so etwas anzeigt. Nüchtern betrachtet war für mich klar, das JSON-Format zu verwenden: Es lässt sich direkt weiterverarbeiten und bleibt trotzdem für Menschen lesbar.
 
-- Da es keine konkreten Rahmenbedingungen gab, habe ich statt einer festen `sales.json` als Eingabequelle die Möglichkeit implementiert, mehrere Reports aus `Data/` zu verarbeiten. In der Realität ist das sicher sinnvoll. Zum Ablauf ist Folgendes zu sagen: Ein fehlerhafter Report unterbricht nicht den gesamten Lauf, sondern wird übersprungen und wird im sowohl über den Logger als auch im Exit-Code gemeldet.
+- Da es keine konkreten Rahmenbedingungen gab, habe ich statt einer festen `sales.json` als Eingabequelle die Möglichkeit implementiert, mehrere Reports aus `Data/` zu verarbeiten. In der Realität ist das sicher sinnvoll. Zum Ablauf ist Folgendes zu sagen: Ein fehlerhafter Report unterbricht nicht den gesamten Lauf, sondern wird übersprungen und wird sowohl über den Logger als auch im Exit-Code gemeldet.
 
 ### Was ich in der Realität bei diesem Projekt anders machen würde
 - **Ablauf:** Der `ReportJob` läuft einmal und wird direkt aus `Program.cs` gestartet. Wenn die Berichte regelmäßig erstellt werden sollen, etwa an jedem Monatsersten, würde ich daraus einen `BackgroundService` mit Timer machen.
