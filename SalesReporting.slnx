@@ -4,6 +4,7 @@
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
     <File Path="README.md" />
+    <File Path="./.github/workflows/sonarqube.yml" />
   </Folder>
   <Project Path="SalesReporting/SalesReporting.csproj" />
   <Project Path="SalesReporting.Tests/SalesReporting.Tests.csproj" />
